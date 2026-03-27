@@ -5,6 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>SheCodes Weather</title>
   <link href="https://fonts.googleapis.com/css2?family=Nunito:wght@300;400;600;700;800&display=swap" rel="stylesheet" />
+  <script src="https://unpkg.com/axios/dist/axios.min.js"></script>
   <style>
     *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
 
@@ -20,17 +21,10 @@
       color: #fff;
     }
 
-    .app-container {
-      width: 100%;
-      max-width: 860px;
-    }
+    .app-container { width: 100%; max-width: 860px; }
 
-    /* ── Search bar ── */
-    .search-form {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 24px;
-    }
+    /* ── Search ── */
+    .search-form { display: flex; gap: 10px; margin-bottom: 24px; }
 
     .search-form input {
       flex: 1;
@@ -45,7 +39,6 @@
       backdrop-filter: blur(6px);
       transition: background 0.2s;
     }
-
     .search-form input::placeholder { color: rgba(255,255,255,0.55); }
     .search-form input:focus { background: rgba(255,255,255,0.22); }
 
@@ -62,18 +55,10 @@
     .btn:hover { opacity: 0.88; }
     .btn:active { transform: scale(0.97); }
 
-    .btn-search {
-      background: linear-gradient(135deg, #f7971e, #ffd200);
-      color: #1a1a2e;
-    }
+    .btn-search { background: linear-gradient(135deg, #f7971e, #ffd200); color: #1a1a2e; }
+    .btn-locate { background: rgba(255,255,255,0.18); color: #fff; backdrop-filter: blur(6px); }
 
-    .btn-locate {
-      background: rgba(255,255,255,0.18);
-      color: #fff;
-      backdrop-filter: blur(6px);
-    }
-
-    /* ── Main weather card ── */
+    /* ── Weather card ── */
     .weather-card {
       background: rgba(255,255,255,0.1);
       backdrop-filter: blur(14px);
@@ -91,65 +76,24 @@
       gap: 12px;
     }
 
-    .city-name {
-      font-size: 38px;
-      font-weight: 800;
-      letter-spacing: -0.5px;
-      line-height: 1.1;
-    }
+    .city-name { font-size: 38px; font-weight: 800; letter-spacing: -0.5px; line-height: 1.1; }
+    .weather-date { font-size: 14px; color: rgba(255,255,255,0.7); margin-top: 4px; font-weight: 400; }
+    .weather-description { font-size: 20px; font-weight: 600; text-transform: capitalize; color: rgba(255,255,255,0.9); margin-top: 6px; }
 
-    .weather-date {
-      font-size: 14px;
-      color: rgba(255,255,255,0.7);
-      margin-top: 4px;
-      font-weight: 400;
-    }
+    .weather-main { display: flex; align-items: center; gap: 4px; margin-top: 6px; }
 
-    .weather-main {
-      display: flex;
-      align-items: center;
-      gap: 4px;
-      margin-top: 6px;
-    }
-
-    .weather-icon {
-      font-size: 72px;
-      line-height: 1;
-      filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3));
-    }
+    #icon { width: 90px; height: 90px; filter: drop-shadow(0 4px 12px rgba(0,0,0,0.3)); }
 
     .temp-block { display: flex; flex-direction: column; }
 
-    .temperature {
-      font-size: 86px;
-      font-weight: 800;
-      line-height: 1;
-      letter-spacing: -3px;
-    }
+    .temperature { font-size: 86px; font-weight: 800; line-height: 1; letter-spacing: -3px; }
 
-    .unit-toggle {
-      font-size: 22px;
-      color: rgba(255,255,255,0.55);
-      margin-top: 4px;
-      letter-spacing: 1px;
-    }
+    .unit-toggle { font-size: 22px; color: rgba(255,255,255,0.55); margin-top: 4px; letter-spacing: 1px; }
+    .unit-toggle a { color: rgba(255,255,255,0.55); text-decoration: none; cursor: pointer; transition: color 0.2s; }
+    .unit-toggle a:hover { color: #fff; }
+    .unit-toggle a.active { color: #ffd200; font-weight: 700; }
 
-    .unit-toggle span {
-      cursor: pointer;
-      transition: color 0.2s;
-    }
-    .unit-toggle span.active { color: #ffd200; font-weight: 700; }
-    .unit-toggle span:hover { color: #fff; }
-
-    .weather-description {
-      font-size: 20px;
-      font-weight: 600;
-      text-transform: capitalize;
-      color: rgba(255,255,255,0.9);
-      margin-top: 6px;
-    }
-
-    /* ── Extra info row ── */
+    /* ── Details ── */
     .weather-details {
       display: flex;
       gap: 28px;
@@ -160,20 +104,16 @@
       font-size: 14px;
       color: rgba(255,255,255,0.75);
     }
+    .weather-details strong { color: #fff; font-weight: 700; }
 
-    .detail-item strong {
-      color: #fff;
-      font-weight: 700;
-    }
-
-    /* ── Forecast strip ── */
-    .forecast-strip {
+    /* ── Forecast ── */
+    #forecast .row {
       display: grid;
       grid-template-columns: repeat(6, 1fr);
       gap: 10px;
     }
 
-    .forecast-day {
+    .col-2 {
       background: rgba(255,255,255,0.1);
       backdrop-filter: blur(10px);
       border-radius: 18px;
@@ -182,7 +122,7 @@
       text-align: center;
     }
 
-    .forecast-day .day-name {
+    .weather-forecast-date {
       font-size: 12px;
       font-weight: 700;
       text-transform: uppercase;
@@ -190,59 +130,24 @@
       color: rgba(255,255,255,0.65);
     }
 
-    .forecast-day .f-icon { font-size: 30px; margin: 6px 0 4px; }
+    .col-2 img { width: 44px; height: 44px; margin: 6px auto 4px; display: block; }
 
-    .forecast-day .f-hi {
-      font-size: 17px;
-      font-weight: 800;
-      color: #fff;
-    }
+    .weather-forecast-temperature { font-size: 13px; margin-top: 4px; }
+    .weather-forecast-temperature-high { font-size: 16px; font-weight: 800; color: #fff; margin-right: 4px; }
+    .weather-forecast-temperature-low { color: rgba(255,255,255,0.5); }
 
-    .forecast-day .f-lo {
-      font-size: 13px;
-      color: rgba(255,255,255,0.5);
-      margin-top: 2px;
-    }
+    /* ── Loading ── */
+    .loading { text-align: center; padding: 40px; font-size: 18px; color: rgba(255,255,255,0.6); }
 
     /* ── Footer ── */
-    footer {
-      margin-top: 28px;
-      text-align: center;
-      font-size: 13px;
-      color: rgba(255,255,255,0.45);
-    }
-
-    footer a {
-      color: #ffd200;
-      text-decoration: none;
-      font-weight: 700;
-    }
-
+    footer { margin-top: 28px; text-align: center; font-size: 13px; color: rgba(255,255,255,0.45); }
+    footer a { color: #ffd200; text-decoration: none; font-weight: 700; }
     footer a:hover { text-decoration: underline; }
-
-    /* ── Loading / Error ── */
-    .loading {
-      text-align: center;
-      padding: 40px;
-      font-size: 18px;
-      color: rgba(255,255,255,0.6);
-    }
-
-    .error-msg {
-      background: rgba(255, 80, 80, 0.2);
-      border: 1px solid rgba(255,100,100,0.35);
-      border-radius: 14px;
-      padding: 14px 20px;
-      color: #ffb3b3;
-      font-size: 15px;
-      margin-bottom: 18px;
-      text-align: center;
-    }
 
     @media (max-width: 600px) {
       .temperature { font-size: 64px; }
       .city-name { font-size: 28px; }
-      .forecast-strip { grid-template-columns: repeat(3, 1fr); }
+      #forecast .row { grid-template-columns: repeat(3, 1fr); }
       .weather-card { padding: 22px 20px; }
     }
   </style>
@@ -252,51 +157,52 @@
 <div class="app-container">
 
   <!-- Search -->
-  <form class="search-form" id="searchForm">
-    <input type="text" id="cityInput" placeholder="Enter a city..." autocomplete="off" />
+  <form class="search-form" id="search-form">
+    <input type="text" id="search-input-result" placeholder="Enter a city..." autocomplete="off" />
     <button class="btn btn-search" type="submit">Search</button>
-    <button class="btn btn-locate" type="button" id="locateBtn">📍 My Location</button>
+    <button class="btn btn-locate" type="button" id="current-location-button">📍 My Location</button>
   </form>
 
-  <div id="errorBox" class="error-msg" style="display:none;"></div>
+  <!-- Weather Card -->
+  <div class="weather-card">
+    <div id="loading" class="loading">Loading weather... ☁️</div>
 
-  <!-- Weather card -->
-  <div class="weather-card" id="weatherCard">
-    <div class="loading" id="loadingMsg">Enter a city above to get started ☁️</div>
-    <div id="weatherContent" style="display:none;">
+    <div id="weather-content" style="display:none;">
       <div class="weather-header">
         <div>
-          <div class="city-name" id="cityDisplay">—</div>
-          <div class="weather-date" id="dateDisplay">—</div>
-          <div class="weather-description" id="descDisplay">—</div>
+          <div class="city-name" id="current-city">—</div>
+          <div class="weather-date" id="date">—</div>
+          <div class="weather-description" id="weather">—</div>
         </div>
         <div class="weather-main">
-          <div class="weather-icon" id="iconDisplay">⛅</div>
+          <img id="icon" src="" alt="weather icon" />
           <div class="temp-block">
-            <div class="temperature" id="tempDisplay">—</div>
+            <div class="temperature">
+              <span id="temperature">—</span><span style="font-size:42px;">°</span>
+            </div>
             <div class="unit-toggle">
-              <span id="celsiusBtn" class="active" onclick="switchUnit('C')">°C</span>
+              <a id="celsius-link" class="active">C</a>
               &nbsp;|&nbsp;
-              <span id="fahrenheitBtn" onclick="switchUnit('F')">°F</span>
+              <a id="fahrenheit-link">F</a>
             </div>
           </div>
         </div>
       </div>
 
       <div class="weather-details">
-        <div class="detail-item">💧 Humidity: <strong id="humidityDisplay">—</strong></div>
-        <div class="detail-item">💨 Wind: <strong id="windDisplay">—</strong></div>
-        <div class="detail-item">🌡️ Feels like: <strong id="feelsDisplay">—</strong></div>
-        <div class="detail-item">👁️ Visibility: <strong id="visibilityDisplay">—</strong></div>
+        <div>💧 Humidity: <strong><span id="humidity">—</span>%</strong></div>
+        <div>💨 Wind: <strong><span id="wind">—</span> km/h</strong></div>
       </div>
     </div>
   </div>
 
-  <!-- 6-day forecast -->
-  <div class="forecast-strip" id="forecastStrip" style="display:none;"></div>
+  <!-- Forecast -->
+  <div id="forecast"></div>
 
+  <!-- Footer -->
   <footer>
-    <p>Coded by &nbsp;
+    <p>
+      Coded with ❤️ &nbsp;·&nbsp;
       <a href="https://github.com/YOUR-USERNAME/shecodes-weather" target="_blank" rel="noopener">
         ✦ View on GitHub
       </a>
@@ -306,180 +212,135 @@
 </div>
 
 <script>
-  const API_KEY = 'YOUR_OPENWEATHERMAP_API_KEY'; // Replace with your key
-  
-  // ── State ──
-  let currentUnit = 'C';
-  let currentTempC = null;
-  let currentFeelsC = null;
-  let forecastData   = [];
+  let celsiusTemperature = null;
 
-  // ── DOM refs ──
-  const cityInput    = document.getElementById('cityInput');
-  const cityDisplay  = document.getElementById('cityDisplay');
-  const dateDisplay  = document.getElementById('dateDisplay');
-  const descDisplay  = document.getElementById('descDisplay');
-  const iconDisplay  = document.getElementById('iconDisplay');
-  const tempDisplay  = document.getElementById('tempDisplay');
-  const humDisplay   = document.getElementById('humidityDisplay');
-  const windDisplay  = document.getElementById('windDisplay');
-  const feelsDisplay = document.getElementById('feelsDisplay');
-  const visDisplay   = document.getElementById('visibilityDisplay');
-  const loadingMsg   = document.getElementById('loadingMsg');
-  const weatherContent = document.getElementById('weatherContent');
-  const forecastStrip  = document.getElementById('forecastStrip');
-  const errorBox       = document.getElementById('errorBox');
-
-  // ── Helpers ──
-  function toF(c) { return Math.round(c * 9/5 + 32); }
-
-  function showError(msg) {
-    errorBox.textContent = msg;
-    errorBox.style.display = 'block';
-    setTimeout(() => { errorBox.style.display = 'none'; }, 4000);
+  function formatDate(timestamp) {
+    let date = new Date(timestamp);
+    let hours = date.getHours();
+    if (hours < 10) hours = `0${hours}`;
+    let minutes = date.getMinutes();
+    if (minutes < 10) minutes = `0${minutes}`;
+    let days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    let day = days[date.getDay()];
+    return `${day} ${hours}:${minutes}`;
   }
 
-  function formatDate(dt) {
-    const d = new Date(dt * 1000);
-    const days = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
-    const months = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
-    return `${days[d.getDay()]}, ${d.getDate()} ${months[d.getMonth()]} ${d.getFullYear()}`;
+  function formatDay(timestamp) {
+    let date = new Date(timestamp * 1000);
+    let days = ["Sunday","Monday","Tuesday","Wednesday","Thursday","Friday","Saturday"];
+    return days[date.getDay()];
   }
 
-  function emojiForCode(code) {
-    if (code >= 200 && code < 300) return '⛈️';
-    if (code >= 300 && code < 400) return '🌦️';
-    if (code >= 500 && code < 600) return '🌧️';
-    if (code >= 600 && code < 700) return '❄️';
-    if (code >= 700 && code < 800) return '🌫️';
-    if (code === 800) return '☀️';
-    if (code === 801) return '🌤️';
-    if (code <= 804) return '⛅';
-    return '☁️';
+  function showContent() {
+    document.getElementById("loading").style.display = "none";
+    document.getElementById("weather-content").style.display = "block";
   }
 
-  function shortDay(dt) {
-    const d = new Date(dt * 1000);
-    return ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'][d.getDay()];
-  }
+  function displayForecast(response) {
+    let forecast = response.data.daily;
+    let forecastElement = document.querySelector("#forecast");
+    let forecastHTML = `<div class="row">`;
 
-  // ── Render current weather ──
-  function renderCurrent(data) {
-    currentTempC  = Math.round(data.main.temp);
-    currentFeelsC = Math.round(data.main.feels_like);
-
-    cityDisplay.textContent = `${data.name}, ${data.sys.country}`;
-    dateDisplay.textContent = formatDate(data.dt);
-    descDisplay.textContent = data.weather[0].description;
-    iconDisplay.textContent = emojiForCode(data.weather[0].id);
-    humDisplay.textContent  = `${data.main.humidity}%`;
-    windDisplay.textContent = `${Math.round(data.wind.speed * 3.6)} km/h`;
-    visDisplay.textContent  = `${(data.visibility / 1000).toFixed(1)} km`;
-
-    displayTemp();
-
-    loadingMsg.style.display  = 'none';
-    weatherContent.style.display = 'block';
-  }
-
-  // ── Render 6-day forecast ──
-  function renderForecast(list) {
-    const daily = {};
-    list.forEach(item => {
-      const day = shortDay(item.dt);
-      if (!daily[day]) daily[day] = { hi: -Infinity, lo: Infinity, code: item.weather[0].id };
-      daily[day].hi = Math.max(daily[day].hi, item.main.temp_max);
-      daily[day].lo = Math.min(daily[day].lo, item.main.temp_min);
+    forecast.forEach(function (forecastDay, index) {
+      if (index > 0) {
+        forecastHTML += `
+          <div class="col-2">
+            <div class="weather-forecast-date">${formatDay(forecastDay.time)}</div>
+            <img src="http://shecodes-assets.s3.amazonaws.com/api/weather/icons/${forecastDay.condition.icon}.png" alt="${forecastDay.condition.description}" />
+            <div class="weather-forecast-temperature">
+              <span class="weather-forecast-temperature-high">${Math.round(forecastDay.temperature.maximum)}°</span>
+              <span class="weather-forecast-temperature-low">${Math.round(forecastDay.temperature.minimum)}°</span>
+            </div>
+          </div>`;
+      }
     });
 
-    const days = Object.keys(daily).slice(0, 6);
-    forecastData = days.map(d => ({ day: d, ...daily[d] }));
-    renderForecastCards();
-    forecastStrip.style.display = 'grid';
+    forecastHTML += `</div>`;
+    forecastElement.innerHTML = forecastHTML;
   }
 
-  function renderForecastCards() {
-    forecastStrip.innerHTML = forecastData.map(d => {
-      const hi = currentUnit === 'C' ? Math.round(d.hi) : toF(d.hi);
-      const lo = currentUnit === 'C' ? Math.round(d.lo) : toF(d.lo);
-      const unit = currentUnit === 'C' ? '°C' : '°F';
-      return `
-        <div class="forecast-day">
-          <div class="day-name">${d.day}</div>
-          <div class="f-icon">${emojiForCode(d.code)}</div>
-          <div class="f-hi">${hi}${unit}</div>
-          <div class="f-lo">${lo}${unit}</div>
-        </div>`;
-    }).join('');
+  function getForecast(coordinates) {
+    let apiKey = "4c2d34edtb05a9b0ao32170dd17e08f4";
+    let apiUrl = `https://api.shecodes.io/weather/v1/forecast?lat=${coordinates.latitude}&lon=${coordinates.longitude}&key=${apiKey}&units=metric`;
+    axios.get(apiUrl).then(displayForecast);
   }
 
-  // ── Unit switch ──
-  function switchUnit(u) {
-    currentUnit = u;
-    document.getElementById('celsiusBtn').classList.toggle('active', u === 'C');
-    document.getElementById('fahrenheitBtn').classList.toggle('active', u === 'F');
-    displayTemp();
-    renderForecastCards();
+  function showTemperature(response) {
+    celsiusTemperature = response.data.temperature.current;
+
+    document.querySelector("#temperature").innerHTML = Math.round(celsiusTemperature);
+    document.querySelector("#current-city").innerHTML = response.data.city;
+    document.querySelector("#weather").innerHTML = response.data.condition.description;
+    document.querySelector("#humidity").innerHTML = response.data.temperature.humidity;
+    document.querySelector("#wind").innerHTML = Math.round(response.data.wind.speed);
+    document.querySelector("#date").innerHTML = formatDate(response.data.time * 1000);
+
+    let iconElement = document.querySelector("#icon");
+    iconElement.setAttribute("src", `http://shecodes-assets.s3.amazonaws.com/api/weather/icons/${response.data.condition.icon}.png`);
+    iconElement.setAttribute("alt", response.data.condition.description);
+
+    celsiusLink.classList.add("active");
+    fahrenheitLink.classList.remove("active");
+
+    getForecast(response.data.coordinates);
+    showContent();
   }
 
-  function displayTemp() {
-    if (currentTempC === null) return;
-    const t = currentUnit === 'C' ? currentTempC : toF(currentTempC);
-    const f = currentUnit === 'C' ? currentFeelsC : toF(currentFeelsC);
-    const unit = currentUnit === 'C' ? '°C' : '°F';
-    tempDisplay.textContent  = t + unit;
-    feelsDisplay.textContent = f + unit;
+  function search(city) {
+    let apiKey = "4c2d34edtb05a9b0ao32170dd17e08f4";
+    let apiUrl = `https://api.shecodes.io/weather/v1/current?query=${city}&key=${apiKey}&units=metric`;
+    axios.get(apiUrl).then(showTemperature);
   }
 
-  // ── Fetch ──
-  async function fetchWeather(city) {
-    try {
-      const [curRes, fcRes] = await Promise.all([
-        fetch(`https://api.openweathermap.org/data/2.5/weather?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`),
-        fetch(`https://api.openweathermap.org/data/2.5/forecast?q=${encodeURIComponent(city)}&units=metric&appid=${API_KEY}`)
-      ]);
-
-      if (!curRes.ok) throw new Error(`City "${city}" not found.`);
-      const [cur, fc] = await Promise.all([curRes.json(), fcRes.json()]);
-      renderCurrent(cur);
-      renderForecast(fc.list);
-    } catch (e) {
-      showError(e.message || 'Something went wrong. Please try again.');
-    }
+  function searchLocation(position) {
+    let apiKey = "4c2d34edtb05a9b0ao32170dd17e08f4";
+    let lat = position.coords.latitude;
+    let lon = position.coords.longitude;
+    let apiUrl = `https://api.shecodes.io/weather/v1/current?lat=${lat}&lon=${lon}&key=${apiKey}&units=metric`;
+    axios.get(apiUrl).then(showTemperature);
   }
 
-  async function fetchByCoords(lat, lon) {
-    try {
-      const [curRes, fcRes] = await Promise.all([
-        fetch(`https://api.openweathermap.org/data/2.5/weather?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`),
-        fetch(`https://api.openweathermap.org/data/2.5/forecast?lat=${lat}&lon=${lon}&units=metric&appid=${API_KEY}`)
-      ]);
-      if (!curRes.ok) throw new Error('Location not found.');
-      const [cur, fc] = await Promise.all([curRes.json(), fcRes.json()]);
-      renderCurrent(cur);
-      renderForecast(fc.list);
-    } catch (e) {
-      showError(e.message);
-    }
+  function getCurrentLocation(event) {
+    event.preventDefault();
+    navigator.geolocation.getCurrentPosition(searchLocation);
   }
 
-  // ── Events ──
-  document.getElementById('searchForm').addEventListener('submit', e => {
+  function fahrenheitTemp(event) {
+    event.preventDefault();
+    celsiusLink.classList.remove("active");
+    fahrenheitLink.classList.add("active");
+    let fahrenheitTemperature = (celsiusTemperature * 9) / 5 + 32;
+    document.querySelector("#temperature").innerHTML = Math.round(fahrenheitTemperature);
+  }
+
+  function celsiusTemp(event) {
+    event.preventDefault();
+    celsiusLink.classList.add("active");
+    fahrenheitLink.classList.remove("active");
+    document.querySelector("#temperature").innerHTML = Math.round(celsiusTemperature);
+  }
+
+  function handleCity(e) {
     e.preventDefault();
-    const city = cityInput.value.trim();
-    if (city) fetchWeather(city);
-  });
+    let searchInput = document.querySelector("#search-input-result");
+    if (searchInput.value.trim()) {
+      search(searchInput.value.trim());
+    } else {
+      alert("Please type a city");
+    }
+  }
 
-  document.getElementById('locateBtn').addEventListener('click', () => {
-    if (!navigator.geolocation) return showError('Geolocation not supported by your browser.');
-    navigator.geolocation.getCurrentPosition(
-      pos => fetchByCoords(pos.coords.latitude, pos.coords.longitude),
-      ()  => showError('Unable to retrieve your location.')
-    );
-  });
+  let fahrenheitLink = document.querySelector("#fahrenheit-link");
+  fahrenheitLink.addEventListener("click", fahrenheitTemp);
 
-  // ── Load default city on open ──
-  fetchWeather('Paris');
+  let celsiusLink = document.querySelector("#celsius-link");
+  celsiusLink.addEventListener("click", celsiusTemp);
+
+  document.querySelector("#current-location-button").addEventListener("click", getCurrentLocation);
+  document.querySelector("#search-form").addEventListener("submit", handleCity);
+
+  document.querySelector("#date").innerHTML = formatDate(new Date());
+  search("Asunción");
 </script>
 </body>
 </html>
